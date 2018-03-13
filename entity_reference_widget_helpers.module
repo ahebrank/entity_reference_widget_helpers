@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * @file
+ * Contains entity_reference_widget_helpers.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Field\WidgetInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\entity_reference_widget_helpers\FormGenerator;
+
+/**
+ * Implements hook_help().
+ */
+function entity_reference_widget_helpers_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the entity_reference_widget_helpers module.
+    case 'help.page.entity_reference_widget_helpers':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Entity Reference widget enhancements') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_field_widget_settings_summary_alter().
+ */
+function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$summary, $context) {
+  if ($context['field_definition']->getType() == 'entity_reference') {
+    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+    if ($settings['use_dropdown']) {
+      if ($less_than = $settings['dropdown_if_less']) {
+        $summary[] = t('Dropdown if less than @count.', ['count' => $less_than]);
+      }
+      else {
+        $summary[] = t('Use dropdown');
+      }
+    }
+    if ($settings['collection_link']) {
+      $summary[] = t('Show collection link');
+    }
+  }
+
+  // @todo: webform settings
+}
+
+/**
+ * Implements hook_field_widget_third_party_settings_form().
+ */
+function entity_reference_widget_helpers_field_widget_third_party_settings_form(WidgetInterface $plugin, FieldDefinitionInterface $field_definition, $form_mode, $form, FormStateInterface $form_state) {
+  $element = [];
+  if ($field_definition->getType() == 'entity_reference') {
+    $settings = $plugin->getThirdPartySettings('entity_reference_widget_helpers');
+    // @todo check if autocomplete
+    $element['use_dropdown'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Convert autocomplete to dropdown'),
+      '#default_value' => $settings['use_dropdown'],
+    ];
+    $element['dropdown_if_less'] = [
+      '#type' => 'number',
+      '#title' => t('Only convert autocomplete to dropdown if fewer than this many options'),
+      '#default_value' => $settings['dropdown_if_less'],
+    ];
+    // @todo: check if collection route exists
+    $element['collection_link'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Show collection link'),
+      '#default_value' => $settings['collection_link'],
+    ];
+  }
+  return $element;
+
+  // @todo: webform settings
+ }
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function entity_reference_widget_helpers_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
+  if ($context['items']->getFieldDefinition()->getType() == 'entity_reference') {
+    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+    if ($settings['use_dropdown']) {
+      FormGenerator::useDropdown($element, $form_state, $context, $settings['dropdown_if_less']);
+    }
+    if ($settings['collection_link']) {
+      FormGenerator::collectionLink($element, $form_state, $context, $settings['dropdown_if_less']);
+    }
+  }
+
+  // @todo: webform settings
+}

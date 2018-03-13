@@ -1,0 +1,5 @@
+{
+  "name": "drupal/entity_reference_widget_helpers",
+  "type": "drupal-module",
+  "description": "Entity Reference widget enhancements"
+}
