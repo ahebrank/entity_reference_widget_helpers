@@ -47,7 +47,12 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
     }
   }
 
-  // @todo: webform settings
+  if ($context['field_definition']->getType() == 'webform') {
+    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+    if ($settings['collection_link']) {
+      $summary[] = t('Show collection link');
+    }
+  }
 }
 
 /**
@@ -75,9 +80,17 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
       '#default_value' => $settings['collection_link'],
     ];
   }
-  return $element;
 
-  // @todo: webform settings
+  if ($field_definition->getType() == 'webform') {
+    $settings = $plugin->getThirdPartySettings('entity_reference_widget_helpers');
+    $element['collection_link'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Show collection link'),
+      '#default_value' => $settings['collection_link'],
+    ];
+  }
+
+  return $element;
  }
 
 /**
@@ -90,9 +103,14 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
       FormGenerator::useDropdown($element, $form_state, $context, $settings['dropdown_if_less']);
     }
     if ($settings['collection_link']) {
-      FormGenerator::collectionLink($element, $form_state, $context, $settings['dropdown_if_less']);
+      FormGenerator::collectionLink($element, $form_state, $context);
     }
   }
 
-  // @todo: webform settings
+  if ($context['items']->getFieldDefinition()->getType() == 'webform') {
+    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+    if ($settings['collection_link']) {
+      FormGenerator::collectionLink($element, $form_state, $context);
+    }
+  }
 }
