@@ -16,9 +16,9 @@ class FormGenerator {
      * @param [type] $form_state
      * @param [type] $context
      * @param [type] $count
-     * @return void
+     * @return $element
      */
-    public static function useDropdown(&$element, $form_state, $context, $count = 0) {
+    public static function useDropdown($element, $form_state, $context, $count = 0) {
         $entity_helper = \Drupal::service('entity_reference_widget_helpers.entity_helper');
         // @todo: need a plain autocoplete replace
         
@@ -42,6 +42,8 @@ class FormGenerator {
                 '#required' => $required,
             ];
         }
+
+        return $element;
     }
 
     /**
@@ -50,32 +52,44 @@ class FormGenerator {
      * @param [type] $element
      * @param [type] $form_state
      * @param [type] $context
-     * @return void
+     * @return $element
      */
-    public static function collectionLink(&$element, $form_state, $context) {
+    public static function collectionLink($element, $form_state, $context) {
         $entity_manager = \Drupal::entityManager();
         $field_settings = $context['items']->getSettings();
         $urls = [];
         if ($field_settings['target_type'] == 'taxonomy_term') {
             foreach ($field_settings['handler_settings']['target_bundles'] as $bundle) {
-                $vocab = 'List ' . $entity_manager->getStorage('taxonomy_vocabulary')->load($bundle)->label() . ' terms';
-                $urls[$vocab] = Url::fromRoute('entity.taxonomy_vocabulary.overview_form', ['taxonomy_vocabulary' => $bundle]);
+                $urls['list_' . $bundle . '_terms'] = [
+                    'title' => t('List @bundle terms', 
+                        ['@bundle' => $entity_manager->getStorage('taxonomy_vocabulary')->load($bundle)->label()]),
+                    'url' => Url::fromRoute('entity.taxonomy_vocabulary.overview_form', 
+                        ['taxonomy_vocabulary' => $bundle])
+                ];
             }
         }
         if ($field_settings['target_type'] == 'webform') {
-            $urls['List webforms'] = Url::fromRoute('entity.webform.collection');
-        }
-
-
-        $element['collection_links'] = [
-            '#type' => 'dropbutton',
-            '#links' => [],
-        ];
-        foreach ($urls as $k => $url) {
-            $element['collection_links']['#links'][Html::cleanCssIdentifier($k)] = [
-                'title' => t($k),
-                'url' => $url,
+            $urls['list_webforms'] = [
+                'title' => t('List webforms'),
+                'url' => Url::fromRoute('entity.webform.collection')
             ];
         }
+
+        if ($urls) {
+            // stick link(s) in the widget suffix
+            if (!isset($element['#suffix'])) {
+                $element['#suffix'] = '';
+            }
+            $e = [
+                'collection_links' => [
+                    '#type' => 'dropbutton',
+                    '#links' => $urls,
+                ],
+            ];
+            $rendered_collection = \Drupal::service('renderer')->render($e);
+            $element['#suffix'] .= $rendered_collection;
+        }
+
+        return $element;
     }
 }

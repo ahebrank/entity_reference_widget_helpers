@@ -102,17 +102,17 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
   if ($context['items']->getFieldDefinition()->getType() == 'entity_reference') {
     $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
     if ($settings['use_dropdown']) {
-      FormGenerator::useDropdown($element, $form_state, $context, $settings['dropdown_if_less']);
+      $element = FormGenerator::useDropdown($element, $form_state, $context, $settings['dropdown_if_less']);
     }
     if ($settings['collection_link']) {
-      FormGenerator::collectionLink($element, $form_state, $context);
+      $element = FormGenerator::collectionLink($element, $form_state, $context);
     }
   }
 
   if ($context['items']->getFieldDefinition()->getType() == 'webform') {
     $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
     if ($settings['collection_link']) {
-      FormGenerator::collectionLink($element, $form_state, $context);
+      $element = FormGenerator::collectionLink($element, $form_state, $context);
     }
   }
 }
