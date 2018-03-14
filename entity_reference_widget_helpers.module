@@ -11,6 +11,8 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\entity_reference_widget_helpers\FormGenerator;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
@@ -112,5 +114,74 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
     if ($settings['collection_link']) {
       FormGenerator::collectionLink($element, $form_state, $context);
     }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary_alter().
+ */
+function entity_reference_widget_helpers_field_formatter_settings_summary_alter(&$summary, $context) {
+  if ($context['formatter']->getPluginId() == 'entity_reference_label') {
+    if ($custom_link = $context['formatter']->getThirdPartySetting('entity_reference_widget_helpers', 'custom_label_link')) {
+      $summary[] = t('Custom link: @link', ['@link' => $custom_link]);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_formatter_third_party_settings_form().
+ */
+function entity_reference_widget_helpers_field_formatter_third_party_settings_form($plugin, $field_definition, $view_mode, $form, FormStateInterface $form_state) {
+  $element = [];
+  if ($plugin->getPluginId() == 'entity_reference_label') {
+    $element['custom_label_link'] = [
+      '#type' => 'textfield',
+      '#title' => t('Custom link URL'),
+      '#description' => t('Tokens may be used'),
+      '#default_value' => $plugin->getThirdPartySetting('entity_reference_widget_helpers', 'custom_label_link'),
+    ];
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function entity_reference_widget_helpers_preprocess_field(&$variables) {
+  if ($variables['element']['#formatter'] == 'entity_reference_label') {
+
+    $entity = $variables['element']['#object'];
+    $view_mode = $variables['element']['#view_mode'];
+    $field_name = $variables['element']['#field_name'];
+
+    // get the field formatter settings...
+    $entity_display = EntityViewDisplay::collectRenderDisplay($entity, $view_mode);
+    $field_display = $entity_display->getComponent($field_name);
+
+    // get the setting
+    $custom_link = $field_display['third_party_settings']['entity_reference_widget_helpers']['custom_label_link'];
+
+    if ($custom_link) {
+      $token_mapper = \Drupal::service('token.entity_mapper');
+      $parent_type = $token_mapper->getTokenTypeForEntityType($entity->getEntityType()->id());
+      $field_val = $entity->get($field_name);
+
+      foreach ($variables['items'] as $k => $child) {
+        if (isset($variables['items'][$k]['content']['#url'])) {
+          $target = $field_val[$k]->entity;
+          $target_type = $token_mapper->getTokenTypeForEntityType($target->getEntityType()->id());
+
+          // token replacement for both the parent and target entity
+          $data = [
+            $parent_type => $entity,
+            $target_type => $target,
+          ];
+          $path = \Drupal::token()->replace($custom_link, $data);
+          $variables['items'][$k]['content']['#url'] = Url::fromUserInput($path);
+        }
+      }
+    }
+
+    
   }
 }
