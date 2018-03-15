@@ -5,10 +5,10 @@ Miscellaneous helpers to try to improve content entry UX for entity reference fi
 Includes:
 
 Widget settings:
-- add a link to collection listing for supported target types
-- convert an autocomplete widget to a select dropdown
-- add the Paragraph description to the paragraph selection dropdown
+- [add a link to collection listing for supported target types](screenshots/collection-links.png) - including [webform](screenshots/webform.png)
+- [convert an autocomplete widget to a select dropdown](screenshots/dropdown-convert.png)
+- [add the Paragraph description to the paragraph selection dropdown](screenshots/paragraph-description.png)
 - @todo: add a target type / bundle label on the top of an inline entity form
 
 Formatter settings:
-- custom links for linked labels
+- [custom links for linked labels](screenshots/label-custom-link.png)
