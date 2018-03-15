@@ -138,6 +138,9 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
  */
 function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form_object = $form_state->getFormObject();
+  if (!$form_object instanceof Drupal\Core\Entity\ContentEntityForm) {
+    return;
+  }
   $form_entity = $form_object->getEntity();
 
   foreach (Element::children($form) as $key) {
