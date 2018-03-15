@@ -92,4 +92,18 @@ class FormGenerator {
 
         return $element;
     }
+
+    /**
+     * add the paragraph description to the dropdown
+     *
+     * @param [type] $element
+     * @param [type] $form_state
+     * @param [type] $context
+     * @return $element
+     */
+    public static function showParagraphDescription($element, $form_state, $context) {
+        
+
+        return $element;
+    }
 }

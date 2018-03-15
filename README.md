@@ -7,6 +7,7 @@ Includes:
 Widget settings:
 - add a link to collection listing for supported target types
 - convert an autocomplete widget to a select dropdown
+- add the Paragraph description to the paragraph selection dropdown
 - @todo: add a target type / bundle label on the top of an inline entity form
 
 Formatter settings:

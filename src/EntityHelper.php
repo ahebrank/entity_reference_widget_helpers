@@ -46,4 +46,19 @@ class EntityHelper {
         return $opts;
     }
 
+    /**
+     * formatted paragraph bundle name + description
+     *
+     * @param [type] $bundle
+     * @return void
+     */
+    public function getParagraphDescription($bundle) {
+        $paragraph_type = $this->entity_manager->getStorage('paragraphs_type')->load($bundle);
+        $output = $paragraph_type->get('label');
+        if ($description = $paragraph_type->get('description')) {
+            $output .= ' - ' . $description;
+        }
+        return $output;
+    }
+
 }
