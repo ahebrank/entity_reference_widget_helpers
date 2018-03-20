@@ -30,7 +30,8 @@ class FormGenerator {
             $options = $entity_helper->getOptions($target, $bundles);
             if ($count > 0) {
                 if (count($options) > $count) {
-                    return;
+                    // leave unchanged
+                    return $element;
                 }
             }
             $title = $element['form']['entity_id']['#title'];

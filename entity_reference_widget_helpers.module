@@ -40,14 +40,12 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
   $plugin_id = $context['widget']->getPluginId();
 
   if ($type == 'entity_reference') {
-    if ($plugin_id == 'entity_reference_autocomplete') {
-      if ($settings['use_dropdown']) {
-        if ($less_than = $settings['dropdown_if_less']) {
-          $summary[] = t('Dropdown if less than @count.', ['count' => $less_than]);
-        }
-        else {
-          $summary[] = t('Use dropdown');
-        }
+    if ($settings['use_dropdown']) {
+      if ($less_than = $settings['dropdown_if_less']) {
+        $summary[] = t('Dropdown if less than @count options.', ['@count' => $less_than]);
+      }
+      else {
+        $summary[] = t('Use dropdown');
       }
     }
     if ($settings['collection_link']) {
@@ -89,8 +87,8 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
   $plugin_id = $plugin->getPluginId();
 
   if ($type == 'entity_reference') {
-    // autocomplete
-    if ($plugin_id == 'entity_reference_autocomplete') {
+    // autocomplete or IEF
+    if ($plugin_id == 'entity_reference_autocomplete' || strpos($plugin_id, 'inline_entity_form') === 0) {
       $element['use_dropdown'] = [
         '#type' => 'checkbox',
         '#title' => t('Convert autocomplete to dropdown'),
