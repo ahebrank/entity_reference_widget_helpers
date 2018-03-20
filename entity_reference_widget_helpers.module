@@ -242,7 +242,7 @@ function entity_reference_widget_helpers_inline_entity_form_entity_form_alter(&$
   
   $label = [
     '#type' => 'item',
-    '#title' => t('@type - @bundle', ['@type' => $entity_label, '@bundle' => $bundle_label]),
+    '#title' => t('@bundle (@type)', ['@type' => $entity_label, '@bundle' => $bundle_label]),
     '#weight' => -1000,
   ];
 
