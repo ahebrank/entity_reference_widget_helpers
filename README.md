@@ -7,7 +7,7 @@ Includes:
 Entity reference widget settings:
 - add a [link to collection listing](screenshots/collection-links.png) for supported target types
 - conditionally [convert an autocomplete widget to a select dropdown](screenshots/dropdown-convert.png)
-- add the [Paragraph description to the paragraph selection dropdown](screenshot/paragraph-description.png) for a more verbose selector
+- add the [Paragraph description to the paragraph selection dropdown](screenshots/paragraph-description.png) for a more verbose selector
 
 Entity reference formatter settings:
 - [custom links for linked labels](screenshots/label-custom-link.png)
