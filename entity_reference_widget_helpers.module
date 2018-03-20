@@ -34,14 +34,20 @@ function entity_reference_widget_helpers_help($route_name, RouteMatchInterface $
  * Implements hook_field_widget_settings_summary_alter().
  */
 function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$summary, $context) {
-  if ($context['field_definition']->getType() == 'entity_reference') {
-    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
-    if ($settings['use_dropdown']) {
-      if ($less_than = $settings['dropdown_if_less']) {
-        $summary[] = t('Dropdown if less than @count.', ['count' => $less_than]);
-      }
-      else {
-        $summary[] = t('Use dropdown');
+  $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+  $field_definition = $context['field_definition'];
+  $type = $field_definition->getType();
+  $plugin_id = $context['widget']->getPluginId();
+
+  if ($type == 'entity_reference') {
+    if ($plugin_id == 'entity_reference_autocomplete') {
+      if ($settings['use_dropdown']) {
+        if ($less_than = $settings['dropdown_if_less']) {
+          $summary[] = t('Dropdown if less than @count.', ['count' => $less_than]);
+        }
+        else {
+          $summary[] = t('Use dropdown');
+        }
       }
     }
     if ($settings['collection_link']) {
@@ -49,17 +55,26 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
     }
   }
 
-  if ($context['field_definition']->getType() == 'webform') {
-    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+  if ($type == 'webform') {
     if ($settings['collection_link']) {
       $summary[] = t('Show collection link');
     }
   }
 
-  if ($context['field_definition']->getType() == 'entity_reference_revisions') {
-    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+  if ($type == 'entity_reference_revisions') {
     if ($settings['show_paragraph_description']) {
       $summary[] = t('Show description.');
+    }
+  }
+
+  if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition 
+      && $field_definition->getProvider() == 'eck' 
+      && $field_definition->getName() == 'title') {
+    if ($settings['eck_title_label_override']) {
+      $summary[] = t('Override label.');
+    }
+    if ($settings['eck_title_description_override']) {
+      $summary[] = t('Override description.');
     }
   }
 }
@@ -69,19 +84,30 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
  */
 function entity_reference_widget_helpers_field_widget_third_party_settings_form(WidgetInterface $plugin, FieldDefinitionInterface $field_definition, $form_mode, $form, FormStateInterface $form_state) {
   $element = [];
-  if ($field_definition->getType() == 'entity_reference') {
-    $settings = $plugin->getThirdPartySettings('entity_reference_widget_helpers');
-    // @todo check if autocomplete
-    $element['use_dropdown'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Convert autocomplete to dropdown'),
-      '#default_value' => $settings['use_dropdown'],
-    ];
-    $element['dropdown_if_less'] = [
-      '#type' => 'number',
-      '#title' => t('Only convert autocomplete to dropdown if fewer than this many options'),
-      '#default_value' => $settings['dropdown_if_less'],
-    ];
+  $type = $field_definition->getType();
+  $settings = $plugin->getThirdPartySettings('entity_reference_widget_helpers');
+  $plugin_id = $plugin->getPluginId();
+
+  if ($type == 'entity_reference') {
+    // autocomplete
+    if ($plugin_id == 'entity_reference_autocomplete') {
+      $element['use_dropdown'] = [
+        '#type' => 'checkbox',
+        '#title' => t('Convert autocomplete to dropdown'),
+        '#default_value' => $settings['use_dropdown'],
+      ];
+      $element['dropdown_if_less'] = [
+        '#type' => 'number',
+        '#title' => t('Only convert autocomplete to dropdown if fewer than this many options'),
+        '#default_value' => $settings['dropdown_if_less'],
+        '#states' => [
+          'visible' => [
+            ':input[name*="[entity_reference_widget_helpers][use_dropdown]"]' => ['checked' => TRUE],
+          ]
+        ]
+      ];
+    }
+
     // @todo: check if collection route exists
     $element['collection_link'] = [
       '#type' => 'checkbox',
@@ -90,8 +116,7 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
     ];
   }
 
-  if ($field_definition->getType() == 'webform') {
-    $settings = $plugin->getThirdPartySettings('entity_reference_widget_helpers');
+  if ($type == 'webform') {
     $element['collection_link'] = [
       '#type' => 'checkbox',
       '#title' => t('Show collection link'),
@@ -99,12 +124,29 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
     ];
   }
 
-  if ($field_definition->getType() == 'entity_reference_revisions') {
-    $settings = $plugin->getThirdPartySettings('entity_reference_widget_helpers');
+  if ($type == 'entity_reference_revisions') {
     $element['show_paragraph_description'] = [
       '#type' => 'checkbox',
       '#title' => t('Show paragraph description'),
       '#default_value' => $settings['show_paragraph_description'],
+    ];
+  }
+
+  // customization for ECK title fields 
+  if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition
+       && $field_definition->getProvider() == 'eck' 
+       && $field_definition->getName() == 'title') {
+    $element['eck_title_label_override'] = [
+      '#type' => 'textfield',
+      '#title' => t('Label override'),
+      '#description' => t('Replace the default "Title" label'),
+      '#default_value' => $settings['eck_title_label_override'],
+    ];
+    $element['eck_title_description_override'] = [
+      '#type' => 'textfield',
+      '#title' => t('Description override'),
+      '#description' => t('Replace the default "Title of the entity" description'),
+      '#default_value' => $settings['eck_title_description_override'],
     ];
   }
 
@@ -115,8 +157,11 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
  * Implements hook_field_widget_form_alter().
  */
 function entity_reference_widget_helpers_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
-  if ($context['items']->getFieldDefinition()->getType() == 'entity_reference') {
-    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+  $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+  $field_definition = $context['items']->getFieldDefinition();
+  $type = $context['items']->getFieldDefinition()->getType();
+
+  if ($type == 'entity_reference') {
     if ($settings['use_dropdown']) {
       $element = FormGenerator::useDropdown($element, $form_state, $context, $settings['dropdown_if_less']);
     }
@@ -125,10 +170,20 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
     }
   }
 
-  if ($context['items']->getFieldDefinition()->getType() == 'webform') {
-    $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+  if ($type == 'webform') {
     if ($settings['collection_link']) {
       $element = FormGenerator::collectionLink($element, $form_state, $context);
+    }
+  }
+
+  if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition 
+      && $field_definition->getProvider() == 'eck' 
+      && $field_definition->getName() == 'title') {     
+    if ($settings['eck_title_label_override']) {
+      $element['value']['#title'] = t($settings['eck_title_label_override']);
+    }
+    if ($settings['eck_title_description_override']) {
+      $element['value']['#description'] = t($settings['eck_title_description_override']);
     }
   }
 }
@@ -138,31 +193,31 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
  */
 function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form_object = $form_state->getFormObject();
-  if (!$form_object instanceof Drupal\Core\Entity\ContentEntityForm) {
-    return;
-  }
-  $form_entity = $form_object->getEntity();
 
-  foreach (Element::children($form) as $key) {
-    // looking for paragraph references to modify the multipleitem widget
-    if (strpos($key, 'field_') !== 0) {
-      continue;
-    }
+  // handle paragraph add description
+  if ($form_object instanceof Drupal\Core\Entity\ContentEntityForm) {
+    $form_entity = $form_object->getEntity();
+    foreach (Element::children($form) as $key) {
+      // looking for paragraph references to modify the multipleitem widget
+      if (strpos($key, 'field_') !== 0) {
+        continue;
+      }
 
-    $field = $form_entity->get($key);
-    $field_def = $field->getFieldDefinition();
-    if ($field_def->getType() == 'entity_reference_revisions') {
-      $entity_display = $form_object->getFormDisplay($form_state);
-      $field_display = $entity_display->getComponent($key);
+      $field = $form_entity->get($key);
+      $field_def = $field->getFieldDefinition();
+      if ($field_def->getType() == 'entity_reference_revisions') {
+        $entity_display = $form_object->getFormDisplay($form_state);
+        $field_display = $entity_display->getComponent($key);
 
-      if ($field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) {
-        // figure out the new options
-        foreach (Element::children($form[$key]['widget']['add_more']) as $add_more_key) {
-          $val = $form[$key]['widget']['add_more'][$add_more_key];
-          if (isset($val['#bundle_machine_name'])) {
-            $bundle = $val['#bundle_machine_name'];
-            $name = \Drupal::service('entity_reference_widget_helpers.entity_helper')->getParagraphDescription($bundle);
-            $form[$key]['widget']['add_more'][$add_more_key]['#value'] = t('Add @type', ['@type' => $name]);
+        if ($field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) {
+          // figure out the new options
+          foreach (Element::children($form[$key]['widget']['add_more']) as $add_more_key) {
+            $val = $form[$key]['widget']['add_more'][$add_more_key];
+            if (isset($val['#bundle_machine_name'])) {
+              $bundle = $val['#bundle_machine_name'];
+              $name = \Drupal::service('entity_reference_widget_helpers.entity_helper')->getParagraphDescription($bundle);
+              $form[$key]['widget']['add_more'][$add_more_key]['#value'] = t('Add @type', ['@type' => $name]);
+            }
           }
         }
       }
@@ -171,10 +226,36 @@ function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $
 }
 
 /**
+ * Implements hook_inline_entity_form_entity_form_alter().
+ */
+function entity_reference_widget_helpers_inline_entity_form_entity_form_alter(&$entity_form, &$form_state) {
+  // add a label at the top of IEF form to show entity type + bundle
+  $entity = $entity_form['#entity'];
+  $entity_type = $entity->getEntityType();
+  $entity_label = $entity_type->getLabel();
+  $bundle_id = $entity->bundle();
+
+  $bundle_label = \Drupal::entityTypeManager()
+    ->getStorage($entity_type->get('bundle_entity_type'))
+    ->load($bundle_id)
+    ->label();
+  
+  $label = [
+    '#type' => 'item',
+    '#title' => t('@type - @bundle', ['@type' => $entity_label, '@bundle' => $bundle_label]),
+    '#weight' => -1000,
+  ];
+
+  $entity_form['erwh_form_heading'] = $label;
+}
+
+/**
  * Implements hook_field_formatter_settings_summary_alter().
  */
 function entity_reference_widget_helpers_field_formatter_settings_summary_alter(&$summary, $context) {
-  if ($context['formatter']->getPluginId() == 'entity_reference_label') {
+  $plugin_id = $context['formatter']->getPluginId();
+
+  if ($plugin_id == 'entity_reference_label') {
     if ($custom_link = $context['formatter']->getThirdPartySetting('entity_reference_widget_helpers', 'custom_label_link')) {
       $summary[] = t('Custom link: @link', ['@link' => $custom_link]);
     }
@@ -186,7 +267,9 @@ function entity_reference_widget_helpers_field_formatter_settings_summary_alter(
  */
 function entity_reference_widget_helpers_field_formatter_third_party_settings_form($plugin, $field_definition, $view_mode, $form, FormStateInterface $form_state) {
   $element = [];
-  if ($plugin->getPluginId() == 'entity_reference_label') {
+  $plugin_id = $plugin->getPluginId();
+
+  if ($plugin_id == 'entity_reference_label') {
     $element['custom_label_link'] = [
       '#type' => 'textfield',
       '#title' => t('Custom link URL'),
