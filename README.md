@@ -5,15 +5,15 @@ Miscellaneous helpers to try to improve content entry UX for entity reference fi
 Includes:
 
 Entity reference widget settings:
-- add a link to collection listing for supported target types
-- conditionally convert an autocomplete widget to a select dropdown
-- add the Paragraph description to the paragraph selection dropdown for a more verbose selector
+- add a [link to collection listing](screenshots/collection-links.png) for supported target types
+- conditionally [convert an autocomplete widget to a select dropdown](screenshots/dropdown-convert.png)
+- add the [Paragraph description to the paragraph selection dropdown](screenshot/paragraph-description.png) for a more verbose selector
 
 Entity reference formatter settings:
-- custom links for linked labels
+- [custom links for linked labels](screenshots/label-custom-link.png)
 
 Other widget settings:
-- ECK title label/description overrides
+- [ECK title label/description overrides](screenshots/ECK-title-label.png)
 
 Inline entity forms:
-- add a entity type / bundle label to the top of the form
+- add a [entity type / bundle label](screenshots/IEF-label.png) to the top of the form
