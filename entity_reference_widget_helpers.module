@@ -40,7 +40,7 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
   $plugin_id = $context['widget']->getPluginId();
 
   if ($type == 'entity_reference') {
-    if ($settings['use_dropdown']) {
+    if (isset($settings['use_dropdown']) && $settings['use_dropdown']) {
       if ($less_than = $settings['dropdown_if_less']) {
         $summary[] = t('Dropdown if less than @count options.', ['@count' => $less_than]);
       }
@@ -48,19 +48,19 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
         $summary[] = t('Use dropdown');
       }
     }
-    if ($settings['collection_link']) {
+    if (isset($settings['collection_link']) && $settings['collection_link']) {
       $summary[] = t('Show collection link');
     }
   }
 
   if ($type == 'webform') {
-    if ($settings['collection_link']) {
+    if (isset($settings['collection_link']) && $settings['collection_link']) {
       $summary[] = t('Show collection link');
     }
   }
 
   if ($type == 'entity_reference_revisions') {
-    if ($settings['show_paragraph_description']) {
+    if (isset($settings['show_paragraph_description']) && $settings['show_paragraph_description']) {
       $summary[] = t('Show description.');
     }
   }
@@ -68,10 +68,10 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
   if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition 
       && $field_definition->getProvider() == 'eck' 
       && $field_definition->getName() == 'title') {
-    if ($settings['eck_title_label_override']) {
+    if (isset($settings['eck_title_label_override']) && $settings['eck_title_label_override']) {
       $summary[] = t('Override label.');
     }
-    if ($settings['eck_title_description_override']) {
+    if (isset($settings['eck_title_description_override']) && $settings['eck_title_description_override']) {
       $summary[] = t('Override description.');
     }
   }
@@ -156,20 +156,24 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
  */
 function entity_reference_widget_helpers_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
   $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
+  if (empty($settings)) {
+    return;
+  }
+
   $field_definition = $context['items']->getFieldDefinition();
   $type = $context['items']->getFieldDefinition()->getType();
 
   if ($type == 'entity_reference') {
-    if ($settings['use_dropdown']) {
+    if (isset($settings['use_dropdown']) && $settings['use_dropdown']) {
       $element = FormGenerator::useDropdown($element, $form_state, $context, $settings['dropdown_if_less']);
     }
-    if ($settings['collection_link']) {
+    if (isset($settings['collection_link']) && $settings['collection_link']) {
       $element = FormGenerator::collectionLink($element, $form_state, $context);
     }
   }
 
   if ($type == 'webform') {
-    if ($settings['collection_link']) {
+    if (isset($settings['collection_link']) && $settings['collection_link']) {
       $element = FormGenerator::collectionLink($element, $form_state, $context);
     }
   }
@@ -177,10 +181,10 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
   if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition 
       && $field_definition->getProvider() == 'eck' 
       && $field_definition->getName() == 'title') {     
-    if ($settings['eck_title_label_override']) {
+    if (isset($settings['eck_title_label_override']) && $settings['eck_title_label_override']) {
       $element['value']['#title'] = t($settings['eck_title_label_override']);
     }
-    if ($settings['eck_title_description_override']) {
+    if (isset($settings['eck_title_description_override']) && $settings['eck_title_description_override']) {
       $element['value']['#description'] = t($settings['eck_title_description_override']);
     }
   }
@@ -207,7 +211,10 @@ function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $
         $entity_display = $form_object->getFormDisplay($form_state);
         $field_display = $entity_display->getComponent($key);
 
-        if ($field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) {
+        if (isset($field_display['third_party_settings']) 
+          && isset($field_display['third_party_settings']['entity_reference_widget_helpers']) 
+          && isset($field_display['third_party_settings']['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) 
+          && $field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) {
           // figure out the new options
           foreach (Element::children($form[$key]['widget']['add_more']) as $add_more_key) {
             $val = $form[$key]['widget']['add_more'][$add_more_key];
