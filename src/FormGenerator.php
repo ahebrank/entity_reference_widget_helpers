@@ -62,7 +62,7 @@ class FormGenerator {
         if ($field_settings['target_type'] == 'taxonomy_term') {
             foreach ($field_settings['handler_settings']['target_bundles'] as $bundle) {
                 $urls['list_' . $bundle . '_terms'] = [
-                    'title' => t('List @bundle terms', 
+                    'title' => t('Edit @bundle terms', 
                         ['@bundle' => $entity_manager->getStorage('taxonomy_vocabulary')->load($bundle)->label()]),
                     'url' => Url::fromRoute('entity.taxonomy_vocabulary.overview_form', 
                         ['taxonomy_vocabulary' => $bundle])
@@ -71,7 +71,7 @@ class FormGenerator {
         }
         if ($field_settings['target_type'] == 'webform') {
             $urls['list_webforms'] = [
-                'title' => t('List webforms'),
+                'title' => t('Edit webforms'),
                 'url' => Url::fromRoute('entity.webform.collection')
             ];
         }
