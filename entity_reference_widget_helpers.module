@@ -213,7 +213,7 @@ function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $
 
         if (isset($field_display['third_party_settings']) 
           && isset($field_display['third_party_settings']['entity_reference_widget_helpers']) 
-          && isset($field_display['third_party_settings']['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) 
+          && isset($field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) 
           && $field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) {
           // figure out the new options
           foreach (Element::children($form[$key]['widget']['add_more']) as $add_more_key) {
