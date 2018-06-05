@@ -246,12 +246,18 @@ function entity_reference_widget_helpers_inline_entity_form_entity_form_alter(&$
     ->label();
   
   $label = [
-    '#type' => 'item',
-    '#title' => t('@bundle (@type)', ['@type' => $entity_label, '@bundle' => $bundle_label]),
+    '#type' => 'label',
+    '#title' => t('Edit @bundle (@type)', ['@type' => $entity_label, '@bundle' => $bundle_label]),
     '#weight' => -1000,
+    '#attributes' => [
+      'class' => [
+        'erwh__ief-form-label',
+      ]
+    ]
   ];
 
   $entity_form['erwh_form_heading'] = $label;
+  $entity_form['#attached']['library'][] = 'entity_reference_widget_helpers/ief';
 }
 
 /**
