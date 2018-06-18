@@ -20,7 +20,7 @@ class FormGenerator {
      */
     public static function useDropdown($element, $form_state, $context, $count = 0) {
         $entity_helper = \Drupal::service('entity_reference_widget_helpers.entity_helper');
-        // @todo: need a plain autocoplete replace
+        // @todo: need a plain autocomplete replace
         
         // ief add existing autocomplete
         if (isset($element['form']['entity_id'])) {
@@ -96,20 +96,6 @@ class FormGenerator {
             $rendered_collection = \Drupal::service('renderer')->render($e);
             $element['#suffix'] .= $rendered_collection;
         }
-
-        return $element;
-    }
-
-    /**
-     * add the paragraph description to the dropdown
-     *
-     * @param [type] $element
-     * @param [type] $form_state
-     * @param [type] $context
-     * @return $element
-     */
-    public static function showParagraphDescription($element, $form_state, $context) {
-        
 
         return $element;
     }

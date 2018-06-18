@@ -17,3 +17,4 @@ Other widget settings:
 
 Inline entity forms:
 - add a [entity type / bundle label](screenshots/IEF-label.png) to the top of the form
+- modify the 'Add existing' button to a configurable label (by default: 'Choose from existing')

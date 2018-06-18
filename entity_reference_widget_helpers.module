@@ -170,6 +170,14 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
     if (isset($settings['collection_link']) && $settings['collection_link']) {
       $element = FormGenerator::collectionLink($element, $form_state, $context);
     }
+
+    if (isset($element['actions']['ief_add_existing'])) {
+      $config = \Drupal::config('entity_reference_widget_helpers.settings');
+      $args = $element['actions']['ief_add_existing']['#value']->getArguments();
+      $wording = $config->get('ief_choose_wording');
+      $args['@ief_choose_wording'] = $wording? $wording : 'Choose from existing';
+      $element['actions']['ief_add_existing']['#value'] = t('@ief_choose_wording @type_singular', $args);
+    }
   }
 
   if ($type == 'webform') {
