@@ -314,29 +314,29 @@ function entity_reference_widget_helpers_preprocess_field(&$variables) {
     $field_display = $entity_display->getComponent($field_name);
 
     // get the setting
-    $custom_link = $field_display['third_party_settings']['entity_reference_widget_helpers']['custom_label_link'];
+    if (isset($field_display['third_party_settings']['entity_reference_widget_helpers']['custom_label_link'])) {
+      $custom_link = $field_display['third_party_settings']['entity_reference_widget_helpers']['custom_label_link'];
 
-    if ($custom_link) {
-      $token_mapper = \Drupal::service('token.entity_mapper');
-      $parent_type = $token_mapper->getTokenTypeForEntityType($entity->getEntityType()->id());
-      $field_val = $entity->get($field_name);
+      if ($custom_link) {
+        $token_mapper = \Drupal::service('token.entity_mapper');
+        $parent_type = $token_mapper->getTokenTypeForEntityType($entity->getEntityType()->id());
+        $field_val = $entity->get($field_name);
 
-      foreach ($variables['items'] as $k => $child) {
-        if (isset($variables['items'][$k]['content']['#url'])) {
-          $target = $field_val[$k]->entity;
-          $target_type = $token_mapper->getTokenTypeForEntityType($target->getEntityType()->id());
+        foreach ($variables['items'] as $k => $child) {
+          if (isset($variables['items'][$k]['content']['#url'])) {
+            $target = $field_val[$k]->entity;
+            $target_type = $token_mapper->getTokenTypeForEntityType($target->getEntityType()->id());
 
-          // token replacement for both the parent and target entity
-          $data = [
-            $parent_type => $entity,
-            $target_type => $target,
-          ];
-          $path = \Drupal::token()->replace($custom_link, $data);
-          $variables['items'][$k]['content']['#url'] = Url::fromUserInput($path);
+            // token replacement for both the parent and target entity
+            $data = [
+              $parent_type => $entity,
+              $target_type => $target,
+            ];
+            $path = \Drupal::token()->replace($custom_link, $data);
+            $variables['items'][$k]['content']['#url'] = Url::fromUserInput($path);
+          }
         }
       }
-    }
-
-    
+    } 
   }
 }
