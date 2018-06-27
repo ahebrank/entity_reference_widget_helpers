@@ -42,6 +42,14 @@ class FormGenerator {
                 '#title' => $title,
                 '#required' => $required,
             ];
+            // disable the grouping options
+            foreach ($options as $id => $opt) {
+                $element['form']['entity_id'][$id] = [
+                    '#attributes' => [
+                        '#disabled' => 'disabled',
+                    ],
+                ];
+            }
         }
 
         return $element;
