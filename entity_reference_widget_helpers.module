@@ -7,8 +7,6 @@
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Field\WidgetInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -41,7 +39,6 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
   $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
   $field_definition = $context['field_definition'];
   $type = $field_definition->getType();
-  $plugin_id = $context['widget']->getPluginId();
 
   if ($type == 'entity_reference') {
     if (isset($settings['use_dropdown']) && $settings['use_dropdown']) {
@@ -69,8 +66,7 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
     }
   }
 
-  if ($field_definition instanceof
-  BaseFieldDefinition
+  if ($field_definition instanceof BaseFieldDefinition
       && $field_definition->getProvider() == 'eck'
       && $field_definition->getName() == 'title') {
     if (isset($settings['eck_title_label_override']) && $settings['eck_title_label_override']) {
@@ -136,8 +132,7 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
   }
 
   // Customization for ECK title fields.
-  if ($field_definition instanceof
-  BaseFieldDefinition
+  if ($field_definition instanceof BaseFieldDefinition
        && $field_definition->getProvider() == 'eck'
        && $field_definition->getName() == 'title') {
     $element['eck_title_label_override'] = [
@@ -192,8 +187,7 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
     }
   }
 
-  if ($field_definition instanceof
-  BaseFieldDefinition
+  if ($field_definition instanceof BaseFieldDefinition
       && $field_definition->getProvider() == 'eck'
       && $field_definition->getName() == 'title') {
     if (isset($settings['eck_title_label_override']) && $settings['eck_title_label_override']) {
