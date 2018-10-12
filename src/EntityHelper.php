@@ -5,6 +5,7 @@ namespace Drupal\entity_reference_widget_helpers;
 use Drupal\Core\Entity\Query\QueryFactory;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\DepenencyInjection\ContainerInterface;
+use Drupal\Component\Utility\Unicode;
 
 class EntityHelper {
     /**
@@ -39,9 +40,36 @@ class EntityHelper {
         $ids = $query->execute();
 
         $entities = $this->entity_manager->getStorage($type)->loadMultiple($ids);
-        $opts = [];
+        $entity_summary = [];
         foreach ($entities as $id => $entity) {
-            $opts[$id] = $entity->label();
+            $entity_summary[$id] = [
+                'id' => $id,
+                'bundle' => $entity->bundle(),
+                'label' => Unicode::truncate($entity->label(), 80),
+            ];
+        }
+
+        // this works as long as there's only one entity type per reference field
+        $bundle_type_id = $entity->getEntityType()->getBundleEntityType();
+        $entity_type_storage = \Drupal::entityTypeManager()->getStorage($bundle_type_id);
+
+        // unique bundles
+        $bundles = array_unique(array_map(function($e) {
+            return $e['bundle'];
+        }, $entity_summary));
+
+        $opts = [];
+        foreach ($bundles as $bundle) {
+            $bundle_label = $entity_type_storage
+                ->load($bundle)
+                ->label();
+            $opts[$bundle_label] = [];
+            foreach ($entity_summary as $id => $summary) {
+                if ($summary['bundle'] == $bundle) {
+                    $opts[$bundle_label][$id] = $summary['label'];
+                }
+            }
+            asort($opts[$bundle_label]);
         }
         return $opts;
     }

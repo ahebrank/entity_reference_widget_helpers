@@ -18,7 +18,7 @@ class FormGenerator {
      * @param [type] $count
      * @return $element
      */
-    public static function useDropdown($element, $form_state, $context, $count = 0) {
+    public static function useDropdown($element, $form_state, $context, $max_count = 0) {
         $entity_helper = \Drupal::service('entity_reference_widget_helpers.entity_helper');
         // @todo: need a plain autocomplete replace
         
@@ -28,11 +28,14 @@ class FormGenerator {
             $target = $element['form']['entity_id']['#target_type'];
             $bundles = $element['form']['entity_id']['#selection_settings']['target_bundles'];
             $options = $entity_helper->getOptions($target, $bundles);
-            if ($count > 0) {
-                if (count($options) > $count) {
-                    // leave unchanged
-                    return $element;
-                }
+            $options_count = count($options);
+            // Nothing there? Return unchanged.
+            if ($options_count == 0) {
+                return $element;
+            }
+            // Max count exceeded? Return unchanged.
+            if ($max_count > 0 && $options_count > $max_count) {
+                return $element;
             }
             $title = $element['form']['entity_id']['#title'];
             $required = $element['form']['entity_id']['#required'];
@@ -42,6 +45,14 @@ class FormGenerator {
                 '#title' => $title,
                 '#required' => $required,
             ];
+            // disable the grouping options
+            foreach ($options as $id => $opt) {
+                $element['form']['entity_id'][$id] = [
+                    '#attributes' => [
+                        '#disabled' => 'disabled',
+                    ],
+                ];
+            }
         }
 
         return $element;
