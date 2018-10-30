@@ -89,4 +89,14 @@ class EntityHelper {
         return $output;
     }
 
+    /**
+     * Count number of entities.
+     */
+    public function countEntities($type, $bundles) {
+        $query = $this->entity_query->get($type)
+            ->condition('type', $bundles, 'IN')
+            ->count();
+        return $query->execute();
+    }
+
 }
