@@ -162,6 +162,7 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
   }
 
   $field_definition = $context['items']->getFieldDefinition();
+  $field_settings = $field_definition->getSettings();
   $type = $context['items']->getFieldDefinition()->getType();
 
   if ($type == 'entity_reference') {
@@ -178,6 +179,11 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
       $wording = $config->get('ief_choose_wording');
       $args['@ief_choose_wording'] = $wording ? $wording : 'Choose from existing';
       $element['actions']['ief_add_existing']['#value'] = t('@ief_choose_wording @type_singular', $args);
+
+      $entity_helper = \Drupal::service('entity_reference_widget_helpers.entity_helper');
+      if ($entity_helper->countEntities($field_settings['target_type'], $field_settings['handler_settings']['target_bundles']) < 1) {
+        $element['actions']['ief_add_existing']['#disabled'] = TRUE;
+      }
     }
   }
 
