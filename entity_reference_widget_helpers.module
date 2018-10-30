@@ -5,6 +5,8 @@
  * Contains entity_reference_widget_helpers.module.
  */
 
+use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Field\WidgetInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
@@ -37,7 +39,6 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
   $settings = $context['widget']->getThirdPartySettings('entity_reference_widget_helpers');
   $field_definition = $context['field_definition'];
   $type = $field_definition->getType();
-  $plugin_id = $context['widget']->getPluginId();
 
   if ($type == 'entity_reference') {
     if (isset($settings['use_dropdown']) && $settings['use_dropdown']) {
@@ -65,8 +66,8 @@ function entity_reference_widget_helpers_field_widget_settings_summary_alter(&$s
     }
   }
 
-  if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition 
-      && $field_definition->getProvider() == 'eck' 
+  if ($field_definition instanceof BaseFieldDefinition
+      && $field_definition->getProvider() == 'eck'
       && $field_definition->getName() == 'title') {
     if (isset($settings['eck_title_label_override']) && $settings['eck_title_label_override']) {
       $summary[] = t('Override label.');
@@ -87,7 +88,7 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
   $plugin_id = $plugin->getPluginId();
 
   if ($type == 'entity_reference') {
-    // autocomplete or IEF
+    // Autocomplete or IEF.
     if ($plugin_id == 'entity_reference_autocomplete' || strpos($plugin_id, 'inline_entity_form') === 0) {
       $element['use_dropdown'] = [
         '#type' => 'checkbox',
@@ -101,8 +102,8 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
         '#states' => [
           'visible' => [
             ':input[name*="[entity_reference_widget_helpers][use_dropdown]"]' => ['checked' => TRUE],
-          ]
-        ]
+          ],
+        ],
       ];
     }
 
@@ -130,9 +131,9 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
     ];
   }
 
-  // customization for ECK title fields 
-  if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition
-       && $field_definition->getProvider() == 'eck' 
+  // Customization for ECK title fields.
+  if ($field_definition instanceof BaseFieldDefinition
+       && $field_definition->getProvider() == 'eck'
        && $field_definition->getName() == 'title') {
     $element['eck_title_label_override'] = [
       '#type' => 'textfield',
@@ -149,7 +150,7 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
   }
 
   return $element;
- }
+}
 
 /**
  * Implements hook_field_widget_form_alter().
@@ -176,7 +177,7 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
       $config = \Drupal::config('entity_reference_widget_helpers.settings');
       $args = $element['actions']['ief_add_existing']['#value']->getArguments();
       $wording = $config->get('ief_choose_wording');
-      $args['@ief_choose_wording'] = $wording? $wording : 'Choose from existing';
+      $args['@ief_choose_wording'] = $wording ? $wording : 'Choose from existing';
       $element['actions']['ief_add_existing']['#value'] = t('@ief_choose_wording @type_singular', $args);
 
       $entity_helper = \Drupal::service('entity_reference_widget_helpers.entity_helper');
@@ -192,9 +193,9 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
     }
   }
 
-  if ($field_definition instanceof \Drupal\Core\Field\BaseFieldDefinition 
-      && $field_definition->getProvider() == 'eck' 
-      && $field_definition->getName() == 'title') {     
+  if ($field_definition instanceof BaseFieldDefinition
+      && $field_definition->getProvider() == 'eck'
+      && $field_definition->getName() == 'title') {
     if (isset($settings['eck_title_label_override']) && $settings['eck_title_label_override']) {
       $element['value']['#title'] = t($settings['eck_title_label_override']);
     }
@@ -210,11 +211,11 @@ function entity_reference_widget_helpers_field_widget_form_alter(&$element, Form
 function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form_object = $form_state->getFormObject();
 
-  // handle paragraph add description
-  if ($form_object instanceof Drupal\Core\Entity\ContentEntityForm) {
+  // Handle paragraph add description.
+  if ($form_object instanceof ContentEntityForm) {
     $form_entity = $form_object->getEntity();
     foreach (Element::children($form) as $key) {
-      // looking for paragraph references to modify the multipleitem widget
+      // Looking for paragraph references to modify the multipleitem widget.
       if (strpos($key, 'field_') !== 0) {
         continue;
       }
@@ -225,11 +226,11 @@ function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $
         $entity_display = $form_object->getFormDisplay($form_state);
         $field_display = $entity_display->getComponent($key);
 
-        if (isset($field_display['third_party_settings']) 
-          && isset($field_display['third_party_settings']['entity_reference_widget_helpers']) 
-          && isset($field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) 
+        if (isset($field_display['third_party_settings'])
+          && isset($field_display['third_party_settings']['entity_reference_widget_helpers'])
+          && isset($field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description'])
           && $field_display['third_party_settings']['entity_reference_widget_helpers']['show_paragraph_description']) {
-          // figure out the new options
+          // Figure out the new options.
           foreach (Element::children($form[$key]['widget']['add_more']) as $add_more_key) {
             $val = $form[$key]['widget']['add_more'][$add_more_key];
             if (isset($val['#bundle_machine_name'])) {
@@ -248,7 +249,7 @@ function entity_reference_widget_helpers_form_alter(&$form, FormStateInterface $
  * Implements hook_inline_entity_form_entity_form_alter().
  */
 function entity_reference_widget_helpers_inline_entity_form_entity_form_alter(&$entity_form, &$form_state) {
-  // add a label at the top of IEF form to show entity type + bundle
+  // Add a label at the top of IEF form to show entity type + bundle.
   $entity = $entity_form['#entity'];
   $entity_type = $entity->getEntityType();
   $entity_label = $entity_type->getLabel();
@@ -258,7 +259,7 @@ function entity_reference_widget_helpers_inline_entity_form_entity_form_alter(&$
     ->getStorage($entity_type->get('bundle_entity_type'))
     ->load($bundle_id)
     ->label();
-  
+
   $label = [
     '#type' => 'label',
     '#title' => t('Edit @bundle (@type)', ['@type' => $entity_label, '@bundle' => $bundle_label]),
@@ -266,8 +267,8 @@ function entity_reference_widget_helpers_inline_entity_form_entity_form_alter(&$
     '#attributes' => [
       'class' => [
         'erwh__ief-form-label',
-      ]
-    ]
+      ],
+    ],
   ];
 
   $entity_form['erwh_form_heading'] = $label;
@@ -315,11 +316,11 @@ function entity_reference_widget_helpers_preprocess_field(&$variables) {
     $view_mode = $variables['element']['#view_mode'];
     $field_name = $variables['element']['#field_name'];
 
-    // get the field formatter settings...
+    // Get the field formatter settings...
     $entity_display = EntityViewDisplay::collectRenderDisplay($entity, $view_mode);
     $field_display = $entity_display->getComponent($field_name);
 
-    // get the setting
+    // Get the setting.
     if (isset($field_display['third_party_settings']['entity_reference_widget_helpers']['custom_label_link'])) {
       $custom_link = $field_display['third_party_settings']['entity_reference_widget_helpers']['custom_label_link'];
 
@@ -333,7 +334,7 @@ function entity_reference_widget_helpers_preprocess_field(&$variables) {
             $target = $field_val[$k]->entity;
             $target_type = $token_mapper->getTokenTypeForEntityType($target->getEntityType()->id());
 
-            // token replacement for both the parent and target entity
+            // Token replacement for both the parent and target entity.
             $data = [
               $parent_type => $entity,
               $target_type => $target,
@@ -343,6 +344,6 @@ function entity_reference_widget_helpers_preprocess_field(&$variables) {
           }
         }
       }
-    } 
+    }
   }
 }
