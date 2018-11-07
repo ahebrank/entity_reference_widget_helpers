@@ -39,8 +39,10 @@ class EntityHelper {
    * @return array
    */
   public function getOptions($type, $bundles) {
-    $query = $this->entity_query->get($type)
-      ->condition('type', $bundles, 'IN');
+    $query = $this->entity_query->get($type);
+    if ($bundles) {
+      $query->condition('type', $bundles, 'IN');
+    }
     $ids = $query->execute();
 
     $entities = $this->entity_manager->getStorage($type)->loadMultiple($ids);
@@ -80,10 +82,6 @@ class EntityHelper {
 
   /**
    * Formatted paragraph bundle name + description.
-   *
-   * @param [type] $bundle
-   *
-   * @return void
    */
   public function getParagraphDescription($bundle) {
     $paragraph_type = $this->entity_manager->getStorage('paragraphs_type')->load($bundle);
@@ -99,8 +97,10 @@ class EntityHelper {
    */
   public function countEntities($type, $bundles) {
     $query = $this->entity_query->get($type)
-      ->condition('type', $bundles, 'IN')
       ->count();
+    if ($bundles) {
+      $query->condition('type', $bundles, 'IN');
+    }
     return $query->execute();
   }
 
