@@ -93,12 +93,12 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
       $element['use_dropdown'] = [
         '#type' => 'checkbox',
         '#title' => t('Convert autocomplete to dropdown'),
-        '#default_value' => $settings['use_dropdown'],
+        '#default_value' => (isset($settings['use_dropdown'])) ? $settings['use_dropdown'] : '',
       ];
       $element['dropdown_if_less'] = [
         '#type' => 'number',
         '#title' => t('Only convert autocomplete to dropdown if fewer than this many options'),
-        '#default_value' => $settings['dropdown_if_less'],
+        '#default_value' => (isset($settings['dropdown_if_less'])) ? $settings['dropdown_if_less'] : '',
         '#states' => [
           'visible' => [
             ':input[name*="[entity_reference_widget_helpers][use_dropdown]"]' => ['checked' => TRUE],
@@ -111,7 +111,7 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
     $element['collection_link'] = [
       '#type' => 'checkbox',
       '#title' => t('Show collection link'),
-      '#default_value' => $settings['collection_link'],
+      '#default_value' => (isset($settings['collection_link'])) ? $settings['collection_link'] : '',
     ];
   }
 
@@ -119,7 +119,7 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
     $element['collection_link'] = [
       '#type' => 'checkbox',
       '#title' => t('Show collection link'),
-      '#default_value' => $settings['collection_link'],
+      '#default_value' => (isset($settings['collection_link'])) ? $settings['collection_link'] : '',
     ];
   }
 
@@ -127,7 +127,7 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
     $element['show_paragraph_description'] = [
       '#type' => 'checkbox',
       '#title' => t('Show paragraph description'),
-      '#default_value' => $settings['show_paragraph_description'],
+      '#default_value' => (isset($settings['show_paragraph_description'])) ? $settings['show_paragraph_description'] : '',
     ];
   }
 
@@ -139,13 +139,13 @@ function entity_reference_widget_helpers_field_widget_third_party_settings_form(
       '#type' => 'textfield',
       '#title' => t('Label override'),
       '#description' => t('Replace the default "Title" label'),
-      '#default_value' => $settings['eck_title_label_override'],
+      '#default_value' => (isset($settings['eck_title_label_override'])) ? $settings['eck_title_label_override'] : '',
     ];
     $element['eck_title_description_override'] = [
       '#type' => 'textfield',
       '#title' => t('Description override'),
       '#description' => t('Replace the default "Title of the entity" description'),
-      '#default_value' => $settings['eck_title_description_override'],
+      '#default_value' => (isset($settings['eck_title_description_override'])) ? $settings['eck_title_description_override'] : '',
     ];
   }
 
